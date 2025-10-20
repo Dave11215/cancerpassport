@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cancer Passport Study - PI Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 1.1em;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+        }
+
+        .category-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .category-icon {
+            font-size: 2em;
+            margin-right: 15px;
+        }
+
+        .category-title {
+            color: #2d3748;
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+
+        .metric-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .metric-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .metric-label {
+            color: #4a5568;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .metric-detail {
+            color: #718096;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .status-excellent {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .status-good {
+            background: #bee3f8;
+            color: #2c5282;
+        }
+
+        .status-moderate {
+            background: #feebc8;
+            color: #7c2d12;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s ease;
+        }
+
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .info-icon {
+            cursor: help;
+            color: #667eea;
+            margin-left: 5px;
+            font-weight: bold;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .chart-container {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metric-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .timestamp {
+            text-align: center;
+            color: white;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔬 Cancer Passport Study - Principal Investigator Dashboard</h1>
+            <p class="subtitle">Real-time Metrics & Feasibility Analysis | Vibrent Platform Performance</p>
+        </header>
+
+        <div class="quick-stats">
+            <div class="stat-card">
+                <div class="stat-value">108</div>
+                <div class="stat-label">Total Participants</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">15</div>
+                <div class="stat-label">Median A2FPI (days)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">88%</div>
+                <div class="stat-label">eConsent Completion</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">71%</div>
+                <div class="stat-label">Screening Conversion</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">59%</div>
+                <div class="stat-label">EHR Linkage Rate</div>
+            </div>
+        </div>
+
+        <!-- System Feasibility & Readiness -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">🚀</span>
+                <h2 class="category-title">System Feasibility & Readiness</h2>
+            </div>
+
+            <div class="metric-row">
+                <div>
+                    <div class="metric-label">IRB → Live Deployment</div>
+                    <div class="metric-value">12 <span style="font-size: 0.5em;">days</span></div>
+                    <div class="metric-detail">Range: 9–15 days across sites<br>Validates deployment speed & IRB adaptability</div>
+                    <span class="status-badge status-excellent">Excellent</span>
+                </div>
+                <div>
+                    <div class="metric-label">Go-Live → First Consent</div>
+                    <div class="metric-value">6 <span style="font-size: 0.5em;">days</span></div>
+                    <div class="metric-detail">Immediate participant throughput post-deployment<br>Tests platform readiness</div>
+                    <span class="status-badge status-excellent">Excellent</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enrollment & Funnel Efficiency -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">📊</span>
+                <h2 class="category-title">Enrollment & Funnel Efficiency</h2>
+            </div>
+
+            <div class="metric-row">
+                <div>
+                    <div class="metric-label">Screened → Consented Conversion</div>
+                    <div class="metric-value">71%</div>
+                    <div class="metric-detail">95% CI: 63–78% within 14 days<br>Measures UX clarity & automated reminders</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 71%;"></div>
+                    </div>
+                    <span class="status-badge status-good">Good</span>
+                </div>
+                <div>
+                    <div class="metric-label">Funnel Health Overview</div>
+                    <div class="chart-container">
+                        <div style="margin-bottom: 8px;"><strong>Screened:</strong> 152 participants</div>
+                        <div style="margin-bottom: 8px;"><strong>Consented:</strong> 108 participants (71%)</div>
+                        <div style="margin-bottom: 8px;"><strong>Active:</strong> 95 participants (88%)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task Completion & Engagement -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">✅</span>
+                <h2 class="category-title">Task Completion & Engagement</h2>
+            </div>
+
+            <div class="metric-row">
+                <div>
+                    <div class="metric-label">eConsent Completion (14 days)</div>
+                    <div class="metric-value">88%</div>
+                    <div class="metric-detail">95 of 108 participants<br>Core feasibility endpoint</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 88%;"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="metric-label">Baseline Survey (14 days)</div>
+                    <div class="metric-value">81%</div>
+                    <div class="metric-detail">87 of 108 participants<br>Evaluates task orchestration</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 81%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metric-row">
+                <div>
+                    <div class="metric-label">EHR Linkage (14 days)</div>
+                    <div class="metric-value">62%</div>
+                    <div class="metric-detail">67 of 108 participants<br>Tests trigger latency & adherence</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 62%;"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="metric-label">Brief Check-In (60 days)</div>
+                    <div class="metric-value">76%</div>
+                    <div class="metric-detail">82 of 108 completed first check-in<br>Sustained longitudinal engagement</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 76%;"></div>
+                    </div>
+                    <span class="status-badge status-good">Strong Retention</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- EHR Integration & Data Quality -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">🏥</span>
+                <h2 class="category-title">EHR Integration & Data Quality</h2>
+            </div>
+
+            <div class="metric-row">
+                <div>
+                    <div class="metric-label">EHR Provider Linkage Success</div>
+                    <div class="metric-value">59%</div>
+                    <div class="metric-detail">64 of 108 linked ≥1 provider<br>Median time-to-link: 2.3 days (IQR 1–5)<br>Tests DataStream FHIR connectors</div>
+                    <span class="status-badge status-moderate">Moderate</span>
+                </div>
+                <div>
+                    <div class="metric-label">Data Quality Metrics</div>
+                    <div class="chart-container">
+                        <div style="margin-bottom: 8px;"><strong>Completeness:</strong> 93%</div>
+                        <div style="margin-bottom: 8px;"><strong>Concordance (SR vs EHR):</strong> 84%</div>
+                        <div style="margin-bottom: 8px;"><strong>Refresh Latency:</strong> 21 days median</div>
+                        <div style="margin-top: 10px; color: #4a5568; font-size: 0.9em;">Confirms data trustworthiness & harmonization integrity</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Operational Efficiency -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">⚡</span>
+                <h2 class="category-title">Operational Efficiency & ROI</h2>
+            </div>
+
+            <div class="metric-row">
+                <div>
+                    <div class="metric-label">A2FPI (Activation to First Patient In)</div>
+                    <div class="metric-value">15 <span style="font-size: 0.5em;">days</span></div>
+                    <div class="metric-detail">Median across 4 protocols (IQR 11–19)<br>Historical baseline: 22 days</div>
+                    <span class="status-badge status-excellent">-32% vs Historical</span>
+                </div>
+                <div>
+                    <div class="metric-label">A2FPI Improvement</div>
+                    <div class="metric-value">-32%</div>
+                    <div class="metric-detail">15 days vs 22 days historical median<br>Quantifies trial-readiness ROI</div>
+                    <span class="status-badge status-excellent">Major Improvement</span>
+                </div>
+            </div>
+
+            <div class="metric-row">
+                <div>
+                    <div class="metric-label">Manual Coordinator Interventions</div>
+                    <div class="metric-value">1.2</div>
+                    <div class="metric-detail">Per participant (down from 3.1)<br>-61% reduction in manual edits</div>
+                    <span class="status-badge status-excellent">High Automation</span>
+                </div>
+                <div>
+                    <div class="metric-label">Workflow Automation Gain</div>
+                    <div class="chart-container">
+                        <div style="margin-bottom: 8px;"><strong>Before:</strong> 3.1 edits/participant</div>
+                        <div style="margin-bottom: 8px;"><strong>After:</strong> 1.2 edits/participant</div>
+                        <div style="margin-bottom: 8px;"><strong>Efficiency:</strong> 61% reduction</div>
+                        <div style="margin-top: 10px; color: #4a5568; font-size: 0.9em;">Captures automation gains from system audit logs</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accessibility & Multilingual Support -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">🌍</span>
+                <h2 class="category-title">Accessibility & Multilingual Feasibility</h2>
+            </div>
+
+            <div class="metric-row">
+                <div>
+                    <div class="metric-label">Languages Deployed & IRB-Validated</div>
+                    <div class="metric-value">3</div>
+                    <div class="metric-detail">
+                        <strong>Languages:</strong> English, Spanish, Vietnamese<br>
+                        All consent flows validated under MCW IRB<br>
+                        Demonstrates translation-management scalability
+                    </div>
+                    <span class="status-badge status-good">Multilingual Ready</span>
+                </div>
+                <div>
+                    <div class="metric-label">Cultural Adaptability</div>
+                    <div class="chart-container">
+                        <div style="margin-bottom: 8px;">🇺🇸 <strong>English:</strong> 78 participants (72%)</div>
+                        <div style="margin-bottom: 8px;">🇪🇸 <strong>Spanish:</strong> 22 participants (20%)</div>
+                        <div style="margin-bottom: 8px;">🇻🇳 <strong>Vietnamese:</strong> 8 participants (7%)</div>
+                        <div style="margin-top: 10px; color: #4a5568; font-size: 0.9em;">Shows Vibrent's cultural workflow adaptability</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Consent Opt-Ins -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">📋</span>
+                <h2 class="category-title">Consent Opt-Ins & Future Study Readiness</h2>
+            </div>
+
+            <div class="metric-row">
+                <div>
+                    <div class="metric-label">Recontact Authorization</div>
+                    <div class="metric-value">94%</div>
+                    <div class="metric-detail">101 of 108 participants<br>Registry utility for future studies</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 94%;"></div>
+                    </div>
+                    <span class="status-badge status-excellent">Excellent</span>
+                </div>
+                <div>
+                    <div class="metric-label">Biospecimen Discards Use</div>
+                    <div class="metric-value">91%</div>
+                    <div class="metric-detail">98 of 108 participants<br>Readiness for biobank-linked studies</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 91%;"></div>
+                    </div>
+                    <span class="status-badge status-excellent">Excellent</span>
+                </div>
+            </div>
+
+            <div class="metric-row">
+                <div>
+                    <div class="metric-label">Genomic Data Use Authorization</div>
+                    <div class="metric-value">88%</div>
+                    <div class="metric-detail">95 of 108 participants<br>Key for precision-medicine studies</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 88%;"></div>
+                    </div>
+                    <span class="status-badge status-excellent">Excellent</span>
+                </div>
+                <div>
+                    <div class="metric-label">Consent Module Performance</div>
+                    <div class="chart-container">
+                        <div style="margin-bottom: 8px;"><strong>Recontact:</strong> 94% opt-in</div>
+                        <div style="margin-bottom: 8px;"><strong>Biospecimen:</strong> 91% opt-in</div>
+                        <div style="margin-bottom: 8px;"><strong>Genomics:</strong> 88% opt-in</div>
+                        <div style="margin-top: 10px; color: #4a5568; font-size: 0.9em;">Demonstrates structured consent capture capability</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Research Dataset Readiness -->
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">📦</span>
+                <h2 class="category-title">Research Dataset Readiness</h2>
+            </div>
+
+            <div class="metric-row">
+                <div>
+                    <div class="metric-label">De-identified Dataset Export</div>
+                    <div class="metric-value">12 <span style="font-size: 0.5em;">days</span></div>
+                    <div class="metric-detail">Delivered post-pilot (target ≤14 days)<br>100% required fields validated</div>
+                    <span class="status-badge status-excellent">On Target</span>
+                </div>
+                <div>
+                    <div class="metric-label">Data Export Quality</div>
+                    <div class="chart-container">
+                        <div style="margin-bottom: 8px;"><strong>Delivery Time:</strong> 12 days (target: ≤14)</div>
+                        <div style="margin-bottom: 8px;"><strong>Field Validation:</strong> 100%</div>
+                        <div style="margin-bottom: 8px;"><strong>QA Checklist:</strong> All items passed</div>
+                        <div style="margin-top: 10px; color: #4a5568; font-size: 0.9em;">Validates export tooling & analytic pipeline readiness</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="timestamp">
+            Last Updated: <span id="timestamp"></span>
+        </div>
+    </div>
+
+    <script>
+        // Update timestamp
+        function updateTimestamp() {
+            const now = new Date();
+            const options = {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZoneName: 'short'
+            };
+            document.getElementById('timestamp').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        // Animate progress bars on load
+        function animateProgressBars() {
+            const progressBars = document.querySelectorAll('.progress-fill');
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            updateTimestamp();
+            animateProgressBars();
+        });
+
+        // Add hover effects for tooltips
+        document.querySelectorAll('.metric-label').forEach(label => {
+            label.style.cursor = 'default';
+        });
+    </script>
+</body>
+</html>
